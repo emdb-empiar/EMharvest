@@ -270,7 +270,6 @@ def searchSupervisorData(path):
     try:
         xmlData = xmlDataList[0]
         print('Done')
-        # print(xml)
     except:
         xmlData = 'None'
         print('None found')
@@ -1002,7 +1001,7 @@ def FoilHoleData(xmlpath: Path) -> Dict[str, Any]:
 
     FoilHoleDataDict = dict(sessionName=sessionName, xmlDoseRate=xmlDoseRate, detectorName=detectorName,
                             avgExposureTime=avgExposureTime, detectorMode=detectorMode, slitWidth=slitWidth,
-                            electronSource=electronSource, tiltAngleMin=tiltAngleMin, tiltAngleMax=tiltAngleMax)
+                            electronSource=electronSource, tiltAngleMin=tiltAngleMin, tiltAngleMax=tiltAngleMax, objectiveAperture=objectiveAperture)
 
     return FoilHoleDataDict
 
@@ -1036,7 +1035,6 @@ def find_mics(path, search):
 def deposition_file(xml):
     # Get EPU session name from main EPU xml file, this is a function
     main_sessionName = xml_sessionName(xml)
-
     # This is the data xml metadata file already in a dictionary
     data = searchSupervisorData.xmlDataDict["MicroscopeImage"]
     software_version = df_lookup(main.masterdf, 'epuVersion')
@@ -1130,7 +1128,8 @@ def save_deposition_file(CompleteDataDict):
         'slit_width': CompleteDataDict['slitWidth'],
         'electron_source': CompleteDataDict['electronSource'],
         'tilt_angle_min': CompleteDataDict['tiltAngleMin'],
-        'tilt_angle_max': CompleteDataDict['tiltAngleMax']
+        'tilt_angle_max': CompleteDataDict['tiltAngleMax'],
+        'objectiveAperture': CompleteDataDict['objectiveAperture']
     }
     if args.mode == "TOMO":
         dictHorizontal1.update({'pixel_spacing_x': CompleteDataDict['PixelSpacing'],
@@ -1178,7 +1177,8 @@ def save_deposition_file(CompleteDataDict):
         "slit_width": "em_imaging_optics.energyfilter_slit_width",
         "electron_source": "em_imaging.electron_source",
         "tilt_angle_min": "em_imaging.tilt_angle_min",
-        "tilt_angle_max": "em_imaging.tilt_angle_max"
+        "tilt_angle_max": "em_imaging.tilt_angle_max",
+        "objectiveAperture": "undefined_metadata.objective_aperture"
     }
     if args.mode == "TOMO":
         dictHorizontal2.update({"pixel_spacing_x": "em_map.pixel_spacing_x",
@@ -1240,7 +1240,8 @@ def save_deposition_file(CompleteDataDict):
         '[MicroscopeImage][microscopeData][optics][EnergyFilter][EnergySelectionSlitWidth]',
         '[MicroscopeImage][microscopeData][gun][Sourcetype]',
         '[MicroscopeImage][microscopeData][stage][Position][A]',
-        '[MicroscopeImage][microscopeData][stage][Position][B]'
+        '[MicroscopeImage][microscopeData][stage][Position][B]',
+        '?'
     ]
     if args.mode == "TOMO":
         tfs_xml_path_list.extend(['[PixelSpacing]',
@@ -1283,7 +1284,8 @@ def save_deposition_file(CompleteDataDict):
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][specialist_optics][energyfilter][slith_width]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][electron_source]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_min]',
-        '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]'
+        '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]',
+        '?'
     ]
     if args.mode == "TOMO":
         emdb_xml_path_list.extend(['[emd][map][pixel_spacing][x]',
@@ -1397,7 +1399,7 @@ def perform_minimal_harvest_epu(xml_path, output_dir):
         print("exiting due to not finding any image xml data")
         exit()
     main.mic_count = len(searchedFiles)
-
+    print("XML_PATH", xml_path)
     # Create a deposition file
     deposition_file(xml_path)
 
