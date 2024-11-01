@@ -836,6 +836,8 @@ def AnyXMLDataFile(xmlpath: Path) -> Dict[str, Any]:
     model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
     model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
     model = model_serial_split[0]
+    if model == "TITAN":
+        model = "TFS KRIOS"
     microscope_serial_number = model_serial_split[1]
     microscope_mode = data["microscopeData"]["optics"]["ColumnOperatingTemSubMode"]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
@@ -1059,6 +1061,8 @@ def deposition_file(xml):
     model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
     model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
     model = model_serial_split[0]
+    if model == "TITAN":
+        model = "TFS KRIOS"
     microscope_serial_number = model_serial_split[1]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
 
