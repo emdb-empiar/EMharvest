@@ -10,6 +10,7 @@ import glob
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import re
 
 import json
 from rich.pretty import pprint
@@ -125,7 +126,7 @@ def perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir):
 
     TomoMdocDataDict = TomoMdocData(mdoc_file)
 
-    TomoDataDict['xmlMag'] = TomoMdocDataDict['Magnification']
+    TomoDataDict['xmlMag'] = int(TomoMdocDataDict['Magnification'])
     CompleteTomoDataDict = {**TomoDataDict, **TomoMdocDataDict}
 
     save_deposition_file(CompleteTomoDataDict)
@@ -269,7 +270,6 @@ def searchSupervisorData(path):
     try:
         xmlData = xmlDataList[0]
         print('Done')
-        # print(xml)
     except:
         xmlData = 'None'
         print('None found')
@@ -833,7 +833,12 @@ def AnyXMLDataFile(xmlpath: Path) -> Dict[str, Any]:
 
     acqusition_date = data["microscopeData"]["acquisition"]["acquisitionDateTime"]
     date = acqusition_date.split("T", 1)[0]
-    model = data["microscopeData"]["instrument"]["InstrumentModel"]
+    model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
+    model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
+    model = model_serial_split[0]
+    if model == "TITAN":
+        model = "TFS KRIOS"
+    microscope_serial_number = model_serial_split[1]
     microscope_mode = data["microscopeData"]["optics"]["ColumnOperatingTemSubMode"]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
     xmlMag = data["microscopeData"]["optics"]["TemMagnification"]["NominalMagnification"]
@@ -857,7 +862,7 @@ def AnyXMLDataFile(xmlpath: Path) -> Dict[str, Any]:
         if key == "Aperture[C2].Name":
             C2_micron = data["CustomData"]["a:KeyValueOfstringanyType"][i]["a:Value"]["#text"]
 
-    OverViewDataDict = dict(date=date, model=model, microscope_mode=microscope_mode, eV=eV, xmlMag=xmlMag,
+    OverViewDataDict = dict(date=date, model=model, microscope_serial_number=microscope_serial_number, microscope_mode=microscope_mode, eV=eV, xmlMag=xmlMag,
                             xmlMetrePix=xmlMetrePix, xmlAPix=xmlAPix, objectiveAperture=objectiveAperture,
                             C2_micron=C2_micron, software_name=software_name, software_version=software_version,
                             illumination=illumination)
@@ -998,7 +1003,7 @@ def FoilHoleData(xmlpath: Path) -> Dict[str, Any]:
 
     FoilHoleDataDict = dict(sessionName=sessionName, xmlDoseRate=xmlDoseRate, detectorName=detectorName,
                             avgExposureTime=avgExposureTime, detectorMode=detectorMode, slitWidth=slitWidth,
-                            electronSource=electronSource, tiltAngleMin=tiltAngleMin, tiltAngleMax=tiltAngleMax)
+                            electronSource=electronSource, tiltAngleMin=tiltAngleMin, tiltAngleMax=tiltAngleMax, objectiveAperture=objectiveAperture)
 
     return FoilHoleDataDict
 
@@ -1032,7 +1037,6 @@ def find_mics(path, search):
 def deposition_file(xml):
     # Get EPU session name from main EPU xml file, this is a function
     main_sessionName = xml_sessionName(xml)
-
     # This is the data xml metadata file already in a dictionary
     data = searchSupervisorData.xmlDataDict["MicroscopeImage"]
     software_version = df_lookup(main.masterdf, 'epuVersion')
@@ -1054,6 +1058,12 @@ def deposition_file(xml):
 
     # Get scope and kV
     model = data["microscopeData"]["instrument"]["InstrumentModel"]
+    model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
+    model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
+    model = model_serial_split[0]
+    if model == "TITAN":
+        model = "TFS KRIOS"
+    microscope_serial_number = model_serial_split[1]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
 
     microscope_mode = data["microscopeData"]["optics"]["ColumnOperatingTemSubMode"]
@@ -1067,7 +1077,7 @@ def deposition_file(xml):
     grid_material = grid_parts[1]
 
     EpuDataDict = dict(main_sessionName=main_sessionName, xmlMag=xmlMag, xmlMetrePix=xmlMetrePix, xmlAPix=xmlAPix,
-                       model=model, eV=eV, microscope_mode=microscope_mode, grid_topology=grid_topology,
+                       model=model, microscope_serial_number=microscope_serial_number, eV=eV, microscope_mode=microscope_mode, grid_topology=grid_topology,
                        grid_material=grid_material,
                        software_name="EPU", software_version=software_version, date=date,
                        nominal_defocus_min_microns=nominal_defocus_min_microns,
@@ -1095,6 +1105,7 @@ def save_deposition_file(CompleteDataDict):
     # Save doppio deposition csv file
     dictHorizontal1 = {
         'Microscope': CompleteDataDict['model'],
+        'microscope_serial_number': CompleteDataDict['microscope_serial_number'],
         'software_version': CompleteDataDict['software_version'],
         'date': CompleteDataDict['date'],
         'eV': CompleteDataDict['eV'],
@@ -1121,7 +1132,8 @@ def save_deposition_file(CompleteDataDict):
         'slit_width': CompleteDataDict['slitWidth'],
         'electron_source': CompleteDataDict['electronSource'],
         'tilt_angle_min': CompleteDataDict['tiltAngleMin'],
-        'tilt_angle_max': CompleteDataDict['tiltAngleMax']
+        'tilt_angle_max': CompleteDataDict['tiltAngleMax'],
+        'objectiveAperture': CompleteDataDict['objectiveAperture']
     }
     if args.mode == "TOMO":
         dictHorizontal1.update({'pixel_spacing_x': CompleteDataDict['PixelSpacing'],
@@ -1142,6 +1154,7 @@ def save_deposition_file(CompleteDataDict):
     # Sample data for the second row
     dictHorizontal2 = {
         'Microscope': 'em_imaging.microscope_model',
+        'microscope_serial_number': 'undefined_metadata.microscope_serial_number',
         'software_name': 'em_software.name',
         'software_version': 'em_software.version',
         'software_category': 'em_software.category',
@@ -1168,7 +1181,8 @@ def save_deposition_file(CompleteDataDict):
         "slit_width": "em_imaging_optics.energyfilter_slit_width",
         "electron_source": "em_imaging.electron_source",
         "tilt_angle_min": "em_imaging.tilt_angle_min",
-        "tilt_angle_max": "em_imaging.tilt_angle_max"
+        "tilt_angle_max": "em_imaging.tilt_angle_max",
+        "objectiveAperture": "undefined_metadata.objective_aperture"
     }
     if args.mode == "TOMO":
         dictHorizontal2.update({"pixel_spacing_x": "em_map.pixel_spacing_x",
@@ -1203,6 +1217,7 @@ def save_deposition_file(CompleteDataDict):
 
     tfs_xml_path_list = [
         '[MicroscopeImage][microscopeData][instruments][InstrumentModel]',
+        '?',
         '[MicroscopeImage][microscopeData][core][ApplicationSoftware]',
         '[MicroscopeImage][microscopeData][acquisitionDateTime]',
         '[MicroscopeImage][microscopeData][gun][AccelerationVoltage]',
@@ -1229,7 +1244,8 @@ def save_deposition_file(CompleteDataDict):
         '[MicroscopeImage][microscopeData][optics][EnergyFilter][EnergySelectionSlitWidth]',
         '[MicroscopeImage][microscopeData][gun][Sourcetype]',
         '[MicroscopeImage][microscopeData][stage][Position][A]',
-        '[MicroscopeImage][microscopeData][stage][Position][B]'
+        '[MicroscopeImage][microscopeData][stage][Position][B]',
+        '?'
     ]
     if args.mode == "TOMO":
         tfs_xml_path_list.extend(['[PixelSpacing]',
@@ -1245,6 +1261,7 @@ def save_deposition_file(CompleteDataDict):
 
     emdb_xml_path_list = [
         '[emd][structure_determination_list][structure_determination][microscopy_list]',
+        '?',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][software_list][software][version]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][date]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][acceleration_voltage]',
@@ -1271,7 +1288,8 @@ def save_deposition_file(CompleteDataDict):
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][specialist_optics][energyfilter][slith_width]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][electron_source]',
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_min]',
-        '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]'
+        '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]',
+        '?'
     ]
     if args.mode == "TOMO":
         emdb_xml_path_list.extend(['[emd][map][pixel_spacing][x]',
@@ -1385,7 +1403,7 @@ def perform_minimal_harvest_epu(xml_path, output_dir):
         print("exiting due to not finding any image xml data")
         exit()
     main.mic_count = len(searchedFiles)
-
+    print("XML_PATH", xml_path)
     # Create a deposition file
     deposition_file(xml_path)
 
