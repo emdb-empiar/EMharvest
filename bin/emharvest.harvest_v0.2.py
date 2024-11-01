@@ -836,7 +836,7 @@ def AnyXMLDataFile(xmlpath: Path) -> Dict[str, Any]:
     model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
     model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
     model = model_serial_split[0]
-    microscope_serial = model_serial_split[1]
+    microscope_serial_number = model_serial_split[1]
     microscope_mode = data["microscopeData"]["optics"]["ColumnOperatingTemSubMode"]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
     xmlMag = data["microscopeData"]["optics"]["TemMagnification"]["NominalMagnification"]
@@ -860,7 +860,7 @@ def AnyXMLDataFile(xmlpath: Path) -> Dict[str, Any]:
         if key == "Aperture[C2].Name":
             C2_micron = data["CustomData"]["a:KeyValueOfstringanyType"][i]["a:Value"]["#text"]
 
-    OverViewDataDict = dict(date=date, model=model, microscope_serial=microscope_serial, microscope_mode=microscope_mode, eV=eV, xmlMag=xmlMag,
+    OverViewDataDict = dict(date=date, model=model, microscope_serial_number=microscope_serial_number, microscope_mode=microscope_mode, eV=eV, xmlMag=xmlMag,
                             xmlMetrePix=xmlMetrePix, xmlAPix=xmlAPix, objectiveAperture=objectiveAperture,
                             C2_micron=C2_micron, software_name=software_name, software_version=software_version,
                             illumination=illumination)
@@ -1059,7 +1059,7 @@ def deposition_file(xml):
     model_serial = data["microscopeData"]["instrument"]["InstrumentModel"]
     model_serial_split = re.split(r'(\d+)', model_serial, maxsplit=1)
     model = model_serial_split[0]
-    microscope_serial = model_serial_split[1]
+    microscope_serial_number = model_serial_split[1]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
 
     microscope_mode = data["microscopeData"]["optics"]["ColumnOperatingTemSubMode"]
@@ -1073,7 +1073,7 @@ def deposition_file(xml):
     grid_material = grid_parts[1]
 
     EpuDataDict = dict(main_sessionName=main_sessionName, xmlMag=xmlMag, xmlMetrePix=xmlMetrePix, xmlAPix=xmlAPix,
-                       model=model, microscope_serial=microscope_serial, eV=eV, microscope_mode=microscope_mode, grid_topology=grid_topology,
+                       model=model, microscope_serial_number=microscope_serial_number, eV=eV, microscope_mode=microscope_mode, grid_topology=grid_topology,
                        grid_material=grid_material,
                        software_name="EPU", software_version=software_version, date=date,
                        nominal_defocus_min_microns=nominal_defocus_min_microns,
@@ -1101,7 +1101,7 @@ def save_deposition_file(CompleteDataDict):
     # Save doppio deposition csv file
     dictHorizontal1 = {
         'Microscope': CompleteDataDict['model'],
-        'microscope_serial': CompleteDataDict['microscope_serial'],
+        'microscope_serial_number': CompleteDataDict['microscope_serial_number'],
         'software_version': CompleteDataDict['software_version'],
         'date': CompleteDataDict['date'],
         'eV': CompleteDataDict['eV'],
@@ -1150,7 +1150,7 @@ def save_deposition_file(CompleteDataDict):
     # Sample data for the second row
     dictHorizontal2 = {
         'Microscope': 'em_imaging.microscope_model',
-        'microscope_serial': 'undefined_metadata.microscope_serial',
+        'microscope_serial_number': 'undefined_metadata.microscope_serial_number',
         'software_name': 'em_software.name',
         'software_version': 'em_software.version',
         'software_category': 'em_software.category',
