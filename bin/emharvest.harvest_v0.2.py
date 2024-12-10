@@ -20,10 +20,13 @@ import xmltodict
 import hashlib
 
 import gemmi
+import subprocess
+import urllib
 
 from mmcif.api.DataCategory import DataCategory
 from mmcif.api.PdbxContainers import DataContainer
 from mmcif.io.PdbxWriter import PdbxWriter
+
 
 prog = "EM HARVEST"
 usage = """
@@ -34,7 +37,7 @@ usage = """
         or for non-standard epu files the command is like:
         python emharvest.harvest.py -m SPA -c non-epu -i ../_repo_data/cm33879-3/raw5/metadata/Images-Disc1/GridSquare_30454884/GridSquare_20230531_130838.xml  -o ../_repo_data/dep_cm33879-3
         or for tomogram data usage is:
-        python emharvest.harvest.py -m TOMO -t ../_repo_data/tomo_data/SearchMaps/Overview.xml -o ../_repo_data/ -m TOMO -d ../_repo_data/tomo_data/Position_1_33.mdoc
+        python emharvest.harvest.py -m TOMO -t ../_repo_data/tomo_data/SearchMaps/Overview.xml -o ../dep_tomo/ -d ../_repo_data/tomo_data/Position_1_33.mdoc -y no
         """
 
 parser = argparse.ArgumentParser(description="Microscopy Data Harvest Script")
@@ -48,6 +51,7 @@ parser.add_argument("-o", "--output", help="Output directory for generated repor
 parser.add_argument("-p", "--print", help="Optional: Y = Only print xml and exit")
 parser.add_argument("-t", "--tomogram_file", help="Tomogram file (Required for TOMO mode)")
 parser.add_argument("-d", "--mdoc_file", help="Tomography mdoc file (Required for TOMO mode)")
+parser.add_argument("-y", "--download_dict", default="yes", choices=["yes", "no"], help="Optional: yes = Download the latest dictionary (default: yes)")
 args = parser.parse_args()
 
 
@@ -103,7 +107,6 @@ def main():
             os.makedirs(main.dep_dir)
 
         perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir)
-
 
 def perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir):
     print(f"Processing tomogram data from file: {tomogram_file} and {mdoc_file}")
@@ -983,7 +986,7 @@ def FoilHoleData(xmlpath: Path) -> Dict[str, Any]:
 
     if counting == "true":
         if superResolution == "1":
-            detectorMode = "SUPER-RESOULTION"
+            detectorMode = "SUPER-RESOLUTION"
         elif superResolution == "2":
             detectorMode = "COUNTING"
 
@@ -1353,8 +1356,15 @@ def save_deposition_file(CompleteDataDict):
         cif_dict[dictHorizontal2[key]] = dictHorizontal1[key]
 
     # transalating and writting to cif file
-    print("CIF_DICTIONARY", cif_dict)
+    print("CIF_DICTIONARY", cif_dict, "\n")
     translate_xml_to_cif(cif_dict, CompleteDataDict['main_sessionName'])
+
+    cif_filepath = main.dep_dir + '/' + CompleteDataDict['main_sessionName'] + '_dep.cif'
+    dic_path = os.path.join(os.getcwd(), "mmcif_dictionary/mmcif_pdbx_v50.dic")
+    if args.download_dict == "yes":
+        urllib.request.urlretrieve("https://mmcif.wwpdb.org/dictionaries/ascii/mmcif_pdbx_v50.dic", dic_path)
+    validation_output = main.dep_dir + '/' + 'val_' + CompleteDataDict['main_sessionName'] + '.txt'
+    mmcif_validation(cif_filepath, dic_path, validation_output)
 
 
 def df_lookup(df, column):
@@ -1508,9 +1518,9 @@ def translate_xml_to_cif(input_data, sessionName):
             elif category == "electron_source":
                 if cif_values[0] == "FieldEmission":
                     cif_values = ["FIELD EMISSION GUN"]
-            elif category == "illumination_mode":
-                if cif_values[0] == "PARALLEL":
-                    cif_values = ["FLOOD BEAM"]
+            # elif category == "illumination_mode":
+            #     if cif_values[0] == "PARALLEL":
+            #         cif_values = ["FLOOD BEAM"]
 
             category_list.append(category)
             cif_values_list.append(cif_values)
@@ -1521,4 +1531,48 @@ def translate_xml_to_cif(input_data, sessionName):
     return write_mmcif_file(cif_data_list, sessionName)
 
 
-main()
+def mmcif_validation(cif_file, dic_file, output_file):
+    """
+    Validates an mmCIF file using the Gemmi validate command and saves the output to a file.
+
+    Parameters:
+    cif_file (str): Path to the mmCIF file.
+    dic_file (str): Path to the dictionary file for validation (default: mmcif_pdbx_v50.dic).
+    output_file (str): Path to save the validation output (default: val_TOMO_data.txt).
+
+    Returns:
+    bool: True if the file is valid, False otherwise.
+    str: Detailed output message from the validation command.
+    """
+    try:
+        # Ensure input files exist
+        if not os.path.isfile(cif_file):
+            return False, f"Error: Input CIF file '{cif_file}' does not exist."
+        if not os.path.isfile(dic_file):
+            return False, f"Error: Dictionary file '{dic_file}' does not exist. Download it using the option -d yes"
+
+        # Construct the Gemmi command
+        command = [
+            "gemmi", "validate", "-v", cif_file, "-d", dic_file
+        ]
+
+        # Execute the command and redirect output to a file
+        with open(output_file, "w") as outfile:
+            result = subprocess.run(command, stdout=outfile, stderr=subprocess.PIPE, text=True, env=os.environ.copy())
+
+        # Check for errors in stderr or non-zero exit status
+        if result.returncode != 0:
+            print( f"Validation failed with error and output saved to {output_file}")
+            return False
+        if result.stderr.strip():
+            print(f"Validation encountered issues: {result.stderr.strip()}")
+            return False
+
+        print(f"Validation succeeded. Results saved to {output_file}")
+        return True
+
+    except Exception as e:
+        return False, f"An unexpected error occurred: {str(e)}"
+
+if __name__ == "__main__":
+    main()
