@@ -5,6 +5,8 @@ import fnmatch
 import math
 import argparse
 import datetime
+from wsgiref.simple_server import software_version
+
 import dateutil.parser
 import glob
 from pathlib import Path
@@ -19,7 +21,6 @@ import xmltodict
 
 import hashlib
 
-import gemmi
 import subprocess
 import urllib
 
@@ -43,7 +44,7 @@ usage = """
 parser = argparse.ArgumentParser(description="Microscopy Data Harvest Script")
 parser.add_argument("-m", "--mode", choices=["SPA", "TOMO"], required=True,
                     help="Mode: SPA for Single Particle Analysis or TOMO for Tomography")
-parser.add_argument("-c", "--category", choices=["epu", "non-epu"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
+parser.add_argument("-c", "--category", choices=["epu", "non-epu", "serialEM"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
 parser.add_argument("-i", "--input_file", help="Any input SPA file which is in xml format (Required for SPA mode)")
 parser.add_argument("-e", "--epu", help="EPU session file: Session.dm (Required for SPA mode)")
 parser.add_argument("-a", "--atlas", help="Atlas session file: ScreeningSession.dm (Required for SPA mode)")
@@ -107,6 +108,47 @@ def main():
             os.makedirs(main.dep_dir)
 
         perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir)
+
+    elif args.mode == "SPA" and args.category == "serialEM":
+        mdoc_file = args.mdoc_file
+        if not mdoc_file:
+            parser.error("TOMO mode requires both a --mdoc file for SerialEM.")
+
+        output_dir = os.path.join(os.getcwd(), "emharvest")
+        main.dep_dir = os.path.join(output_dir, "dep/serialEM")
+
+        if not os.path.exists(main.dep_dir):
+            os.makedirs(main.dep_dir)
+
+        perform_serialEM_spa_harvest( mdoc_file, output_dir)
+
+
+def perform_serialEM_spa_harvest(mdoc_file, output_dir):
+    print(f"Processing serialEM SPA data from file: {mdoc_file}")
+    print(f"Output will be saved to: {output_dir}/dep/serialEM")
+
+    serialEMDataDict = TomoMdocData(mdoc_file)
+
+    main_sessionName = "SerialEM_SPA_microscopy_data"
+
+    EpuDataDict = dict(main_sessionName=main_sessionName, grid_topology="?", grid_material="?",
+                       nominal_defocus_min_microns="?", nominal_defocus_max_microns="?",
+                       collection="?", number_of_images="?", spot_size="?", C2_micron="?", Objective_micron="?",
+                       Beam_diameter_micron="?", software_version="?", xmlAPix="?", microscope_mode="?", detectorName="?",
+                       xmlDoseRate="?", detectorMode="?", illumination="?", electronSource="?",
+                       objectiveAperture="?")
+
+    serialEMDataDict['tiltAngleMax'] = "?"
+    serialEMDataDict['tiltAngleMin'] = "?"
+    serialEMDataDict["eV"] = serialEMDataDict.pop("Voltage")
+    serialEMDataDict['xmlMag'] = serialEMDataDict['Magnification']
+    serialEMDataDict['avgExposureTime'] = serialEMDataDict.pop('ExposureTime')
+    serialEMDataDict["slitWidth"] = serialEMDataDict["FilterSlitAndLoss"][0]
+    serialEMDataDict["Loss"] = serialEMDataDict["FilterSlitAndLoss"][1]
+
+    SerialEMSPADataDict = {**EpuDataDict, **serialEMDataDict}
+
+    save_deposition_file(SerialEMSPADataDict)
 
 def perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir):
     print(f"Processing tomogram data from file: {tomogram_file} and {mdoc_file}")
@@ -889,6 +931,25 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
     mdoc_data = {}
 
     with open(mdocpath, "r") as file:
+        first_line = file.readline().strip()
+
+        if args.mode == "SPA" and args.category == "serialEM":
+            match = re.match(
+                r"T\s*=\s*(\w+):\s*(.+?)\s+(\d+)\s+(\d{2}-[A-Za-z]{3}-\d{2})\s+([\d:]+)",
+                first_line.strip()
+            )
+
+            if match:
+                data_dict = {
+                    "software_name": match.group(1),
+                    "model": match.group(2).strip(),
+                    "microscope_serial_number": match.group(3).strip(),
+                    "date": match.group(4).strip(),
+                    "time": match.group(5).strip(),
+                }
+            else:
+                print("Line format does not match the expected pattern.")
+
         for line in file:
             line = line.strip()
             if line.startswith("[") and line.endswith("]"):
@@ -929,7 +990,12 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
                 if len(unique_val) == 1:
                     mdoc_data[key] = unique_val[0]
 
-    return mdoc_data
+    if args.mode == "SPA" and args.category == "serialEM":
+        mdoc_data_dict = {**data_dict, **mdoc_data}
+    else:
+        mdoc_data_dict = mdoc_data
+
+    return mdoc_data_dict
 
 
 def FoilHoleData(xmlpath: Path) -> Dict[str, Any]:
@@ -1502,8 +1568,9 @@ def translate_xml_to_cif(input_data, sessionName):
             if category == "date":
                 cif_values = [cif_values[0].split(" ")[0]]
             elif category == "accelerating_voltage":
-                if cif_values[0] != "?":
-                    cif_values = [int(float(cif_values[0]) / 1000)]
+                if not args.category == "serialEM":
+                    if cif_values[0] != "?":
+                        cif_values = [int(float(cif_values[0]) / 1000)]
             elif category == "nominal_defocus_min":
                 if cif_values[0] != "?":
                     cif_values = [int((cif_values[0]) * -1000)]
@@ -1521,6 +1588,9 @@ def translate_xml_to_cif(input_data, sessionName):
             # elif category == "illumination_mode":
             #     if cif_values[0] == "PARALLEL":
             #         cif_values = ["FLOOD BEAM"]
+            elif category == "microscope_model":
+                if cif_values[0] == "EMBL Krios 3":
+                    cif_values = ["TFS KRIOS"]
 
             category_list.append(category)
             cif_values_list.append(cif_values)
