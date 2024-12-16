@@ -95,7 +95,7 @@ def main():
 
         perform_spa_harvest_nonepu(main.input_xml, output_dir)
 
-    elif args.mode == "TOMO":
+    elif args.mode == "TOMO" and args.category != "serialEM":
         tomogram_file = args.tomogram_file
         mdoc_file = args.mdoc_file
         if not tomogram_file or not mdoc_file:
@@ -109,27 +109,31 @@ def main():
 
         perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir)
 
-    elif args.mode == "SPA" and args.category == "serialEM":
-        mdoc_file = args.mdoc_file
-        if not mdoc_file:
-            parser.error("TOMO mode requires both a --mdoc file for SerialEM.")
+    elif args.mode == "SPA" or args.mode == "TOMO":
+        if args.category == "serialEM":
+            mdoc_file = args.mdoc_file
+            if not mdoc_file:
+                parser.error("SPA and TOMO mode both requires a --mdoc file for SerialEM.")
 
-        output_dir = os.path.join(os.getcwd(), "emharvest")
-        main.dep_dir = os.path.join(output_dir, "dep/serialEM")
+            output_dir = os.path.join(os.getcwd(), "emharvest")
+            if args.mode == "SPA":
+                main.dep_dir = os.path.join(output_dir, "dep/serialEM")
+            if args.mode == "TOMO":
+                main.dep_dir = os.path.join(output_dir, "dep_tomo/serialEM")
 
-        if not os.path.exists(main.dep_dir):
-            os.makedirs(main.dep_dir)
+            if not os.path.exists(main.dep_dir):
+                os.makedirs(main.dep_dir)
 
-        perform_serialEM_spa_harvest( mdoc_file, output_dir)
+            perform_serialEM_harvest( mdoc_file, output_dir)
 
 
-def perform_serialEM_spa_harvest(mdoc_file, output_dir):
+def perform_serialEM_harvest(mdoc_file, output_dir):
     print(f"Processing serialEM SPA data from file: {mdoc_file}")
     print(f"Output will be saved to: {output_dir}/dep/serialEM")
 
     serialEMDataDict = TomoMdocData(mdoc_file)
 
-    main_sessionName = "SerialEM_SPA_microscopy_data"
+    main_sessionName = "SerialEM_microscopy_data"
 
     EpuDataDict = dict(main_sessionName=main_sessionName, grid_topology="?", grid_material="?",
                        nominal_defocus_min_microns="?", nominal_defocus_max_microns="?",
@@ -148,6 +152,7 @@ def perform_serialEM_spa_harvest(mdoc_file, output_dir):
 
     SerialEMSPADataDict = {**EpuDataDict, **serialEMDataDict}
 
+    # print("SerialEMSPADataDict: ", SerialEMSPADataDict)
     save_deposition_file(SerialEMSPADataDict)
 
 def perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir):
@@ -933,22 +938,22 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
     with open(mdocpath, "r") as file:
         first_line = file.readline().strip()
 
-        if args.mode == "SPA" and args.category == "serialEM":
-            match = re.match(
-                r"T\s*=\s*(\w+):\s*(.+?)\s+(\d+)\s+(\d{2}-[A-Za-z]{3}-\d{2})\s+([\d:]+)",
-                first_line.strip()
-            )
-
-            if match:
-                data_dict = {
-                    "software_name": match.group(1),
-                    "model": match.group(2).strip(),
-                    "microscope_serial_number": match.group(3).strip(),
-                    "date": match.group(4).strip(),
-                    "time": match.group(5).strip(),
-                }
-            else:
-                print("Line format does not match the expected pattern.")
+        if args.mode == "SPA" or args.mode == "TOMO":
+            if args.category == "serialEM":
+                match = re.match(
+                    r"T\s*=\s*(\w+):\s*(.+?)\s+(\d+)\s+(\d{2}-[A-Za-z]{3}-\d{2})\s+([\d:]+)",
+                    first_line.strip()
+                )
+                if match:
+                    data_dict = {
+                        "software_name": match.group(1),
+                        "model": match.group(2).strip(),
+                        "microscope_serial_number": match.group(3).strip(),
+                        "date": match.group(4).strip(),
+                        "time": match.group(5).strip(),
+                    }
+                else:
+                    print("Line format does not match the expected pattern.")
 
         for line in file:
             line = line.strip()
@@ -990,7 +995,7 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
                 if len(unique_val) == 1:
                     mdoc_data[key] = unique_val[0]
 
-    if args.mode == "SPA" and args.category == "serialEM":
+    if args.mode == "SPA" or args.mode == "TOMO" and args.category == "serialEM":
         mdoc_data_dict = {**data_dict, **mdoc_data}
     else:
         mdoc_data_dict = mdoc_data
@@ -1204,7 +1209,7 @@ def save_deposition_file(CompleteDataDict):
         'tilt_angle_max': CompleteDataDict['tiltAngleMax'],
         'objectiveAperture': CompleteDataDict['objectiveAperture']
     }
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         dictHorizontal1.update({'pixel_spacing_x': CompleteDataDict['PixelSpacing'],
                                 'pixel_spacing_y': CompleteDataDict['PixelSpacing'],
                                 'pixel_spacing_z': CompleteDataDict['PixelSpacing'],
@@ -1253,7 +1258,7 @@ def save_deposition_file(CompleteDataDict):
         "tilt_angle_max": "em_imaging.tilt_angle_max",
         "objectiveAperture": "undefined_metadata.objective_aperture"
     }
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         dictHorizontal2.update({"pixel_spacing_x": "em_map.pixel_spacing_x",
                                 "pixel_spacing_y": "em_map.pixel_spacing_y",
                                 "pixel_spacing_z": "em_map.pixel_spacing_z",
@@ -1316,7 +1321,7 @@ def save_deposition_file(CompleteDataDict):
         '[MicroscopeImage][microscopeData][stage][Position][B]',
         '?'
     ]
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         tfs_xml_path_list.extend(['[PixelSpacing]',
                                   '[PixelSpacing]',
                                   '[PixelSpacing]',
@@ -1360,7 +1365,7 @@ def save_deposition_file(CompleteDataDict):
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]',
         '?'
     ]
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         emdb_xml_path_list.extend(['[emd][map][pixel_spacing][x]',
                                    '[emd][map][pixel_spacing][y]',
                                    '[emd][map][pixel_spacing][z]',
