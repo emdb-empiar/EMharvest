@@ -603,6 +603,8 @@ def xml_presets_data(micpath: Path) -> Dict[str, Any]:
         if key == "Aperture[OBJ].Name":
             keyvalue = i
             objectiveAperture = data["CustomData"]["a:KeyValueOfstringanyType"][i]["a:Value"]["#text"]
+            if objectiveAperture == "None":
+                objectiveAperture = '?'
         i = i + 1
 
     # Stage tilt
@@ -1228,7 +1230,7 @@ def save_deposition_file(CompleteDataDict):
     # Sample data for the second row
     dictHorizontal2 = {
         'Microscope': 'em_imaging.microscope_model',
-        'microscope_serial_number': 'undefined_metadata.microscope_serial_number',
+        'microscope_serial_number': 'em_imaging.microscope_serial_number',
         'software_name': 'em_software.name',
         'software_version': 'em_software.version',
         'software_category': 'em_software.category',
@@ -1256,7 +1258,7 @@ def save_deposition_file(CompleteDataDict):
         "electron_source": "em_imaging.electron_source",
         "tilt_angle_min": "em_imaging.tilt_angle_min",
         "tilt_angle_max": "em_imaging.tilt_angle_max",
-        "objectiveAperture": "undefined_metadata.objective_aperture"
+        "objectiveAperture": "em_imaging.objective_aperture"
     }
     if args.mode == "TOMO" and args.category != "serialEM":
         dictHorizontal2.update({"pixel_spacing_x": "em_map.pixel_spacing_x",
