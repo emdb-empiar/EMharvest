@@ -5,6 +5,8 @@ import fnmatch
 import math
 import argparse
 import datetime
+from wsgiref.simple_server import software_version
+
 import dateutil.parser
 import glob
 from pathlib import Path
@@ -19,7 +21,6 @@ import xmltodict
 
 import hashlib
 
-import gemmi
 import subprocess
 import urllib
 
@@ -43,7 +44,7 @@ usage = """
 parser = argparse.ArgumentParser(description="Microscopy Data Harvest Script")
 parser.add_argument("-m", "--mode", choices=["SPA", "TOMO"], required=True,
                     help="Mode: SPA for Single Particle Analysis or TOMO for Tomography")
-parser.add_argument("-c", "--category", choices=["epu", "non-epu"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
+parser.add_argument("-c", "--category", choices=["epu", "non-epu", "serialEM"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
 parser.add_argument("-i", "--input_file", help="Any input SPA file which is in xml format (Required for SPA mode)")
 parser.add_argument("-e", "--epu", help="EPU session file: Session.dm (Required for SPA mode)")
 parser.add_argument("-a", "--atlas", help="Atlas session file: ScreeningSession.dm (Required for SPA mode)")
@@ -94,7 +95,7 @@ def main():
 
         perform_spa_harvest_nonepu(main.input_xml, output_dir)
 
-    elif args.mode == "TOMO":
+    elif args.mode == "TOMO" and args.category != "serialEM":
         tomogram_file = args.tomogram_file
         mdoc_file = args.mdoc_file
         if not tomogram_file or not mdoc_file:
@@ -107,6 +108,52 @@ def main():
             os.makedirs(main.dep_dir)
 
         perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir)
+
+    elif args.mode == "SPA" or args.mode == "TOMO":
+        if args.category == "serialEM":
+            mdoc_file = args.mdoc_file
+            if not mdoc_file:
+                parser.error("SPA and TOMO mode both requires a --mdoc file for SerialEM.")
+
+            output_dir = os.path.join(os.getcwd(), "emharvest")
+            if args.mode == "SPA":
+                main.dep_dir = os.path.join(output_dir, "dep/serialEM")
+            if args.mode == "TOMO":
+                main.dep_dir = os.path.join(output_dir, "dep_tomo/serialEM")
+
+            if not os.path.exists(main.dep_dir):
+                os.makedirs(main.dep_dir)
+
+            perform_serialEM_harvest( mdoc_file, output_dir)
+
+
+def perform_serialEM_harvest(mdoc_file, output_dir):
+    print(f"Processing serialEM SPA data from file: {mdoc_file}")
+    print(f"Output will be saved to: {output_dir}/dep/serialEM")
+
+    serialEMDataDict = TomoMdocData(mdoc_file)
+
+    main_sessionName = "SerialEM_microscopy_data"
+
+    EpuDataDict = dict(main_sessionName=main_sessionName, grid_topology="?", grid_material="?",
+                       nominal_defocus_min_microns="?", nominal_defocus_max_microns="?",
+                       collection="?", number_of_images="?", spot_size="?", C2_micron="?", Objective_micron="?",
+                       Beam_diameter_micron="?", software_version="?", xmlAPix="?", microscope_mode="?", detectorName="?",
+                       xmlDoseRate="?", detectorMode="?", illumination="?", electronSource="?",
+                       objectiveAperture="?")
+
+    serialEMDataDict['tiltAngleMax'] = "?"
+    serialEMDataDict['tiltAngleMin'] = "?"
+    serialEMDataDict["eV"] = serialEMDataDict.pop("Voltage")
+    serialEMDataDict['xmlMag'] = serialEMDataDict['Magnification']
+    serialEMDataDict['avgExposureTime'] = serialEMDataDict.pop('ExposureTime')
+    serialEMDataDict["slitWidth"] = serialEMDataDict["FilterSlitAndLoss"][0]
+    serialEMDataDict["Loss"] = serialEMDataDict["FilterSlitAndLoss"][1]
+
+    SerialEMSPADataDict = {**EpuDataDict, **serialEMDataDict}
+
+    # print("SerialEMSPADataDict: ", SerialEMSPADataDict)
+    save_deposition_file(SerialEMSPADataDict)
 
 def perform_tomogram_harvest(tomogram_file, mdoc_file, output_dir):
     print(f"Processing tomogram data from file: {tomogram_file} and {mdoc_file}")
@@ -556,6 +603,8 @@ def xml_presets_data(micpath: Path) -> Dict[str, Any]:
         if key == "Aperture[OBJ].Name":
             keyvalue = i
             objectiveAperture = data["CustomData"]["a:KeyValueOfstringanyType"][i]["a:Value"]["#text"]
+            if objectiveAperture == "None":
+                objectiveAperture = '?'
         i = i + 1
 
     # Stage tilt
@@ -889,6 +938,25 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
     mdoc_data = {}
 
     with open(mdocpath, "r") as file:
+        first_line = file.readline().strip()
+
+        if args.mode == "SPA" or args.mode == "TOMO":
+            if args.category == "serialEM":
+                match = re.match(
+                    r"T\s*=\s*(\w+):\s*(.+?)\s+(\d+)\s+(\d{2}-[A-Za-z]{3}-\d{2})\s+([\d:]+)",
+                    first_line.strip()
+                )
+                if match:
+                    data_dict = {
+                        "software_name": match.group(1),
+                        "model": match.group(2).strip(),
+                        "microscope_serial_number": match.group(3).strip(),
+                        "date": match.group(4).strip(),
+                        "time": match.group(5).strip(),
+                    }
+                else:
+                    print("Line format does not match the expected pattern.")
+
         for line in file:
             line = line.strip()
             if line.startswith("[") and line.endswith("]"):
@@ -929,7 +997,12 @@ def TomoMdocData(mdocpath: Path) -> Dict[str, Any]:
                 if len(unique_val) == 1:
                     mdoc_data[key] = unique_val[0]
 
-    return mdoc_data
+    if args.mode == "SPA" or args.mode == "TOMO" and args.category == "serialEM":
+        mdoc_data_dict = {**data_dict, **mdoc_data}
+    else:
+        mdoc_data_dict = mdoc_data
+
+    return mdoc_data_dict
 
 
 def FoilHoleData(xmlpath: Path) -> Dict[str, Any]:
@@ -1138,7 +1211,7 @@ def save_deposition_file(CompleteDataDict):
         'tilt_angle_max': CompleteDataDict['tiltAngleMax'],
         'objectiveAperture': CompleteDataDict['objectiveAperture']
     }
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         dictHorizontal1.update({'pixel_spacing_x': CompleteDataDict['PixelSpacing'],
                                 'pixel_spacing_y': CompleteDataDict['PixelSpacing'],
                                 'pixel_spacing_z': CompleteDataDict['PixelSpacing'],
@@ -1157,7 +1230,7 @@ def save_deposition_file(CompleteDataDict):
     # Sample data for the second row
     dictHorizontal2 = {
         'Microscope': 'em_imaging.microscope_model',
-        'microscope_serial_number': 'undefined_metadata.microscope_serial_number',
+        'microscope_serial_number': 'em_imaging.microscope_serial_number',
         'software_name': 'em_software.name',
         'software_version': 'em_software.version',
         'software_category': 'em_software.category',
@@ -1185,9 +1258,9 @@ def save_deposition_file(CompleteDataDict):
         "electron_source": "em_imaging.electron_source",
         "tilt_angle_min": "em_imaging.tilt_angle_min",
         "tilt_angle_max": "em_imaging.tilt_angle_max",
-        "objectiveAperture": "undefined_metadata.objective_aperture"
+        "objectiveAperture": "em_imaging.objective_aperture"
     }
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         dictHorizontal2.update({"pixel_spacing_x": "em_map.pixel_spacing_x",
                                 "pixel_spacing_y": "em_map.pixel_spacing_y",
                                 "pixel_spacing_z": "em_map.pixel_spacing_z",
@@ -1250,7 +1323,7 @@ def save_deposition_file(CompleteDataDict):
         '[MicroscopeImage][microscopeData][stage][Position][B]',
         '?'
     ]
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         tfs_xml_path_list.extend(['[PixelSpacing]',
                                   '[PixelSpacing]',
                                   '[PixelSpacing]',
@@ -1294,7 +1367,7 @@ def save_deposition_file(CompleteDataDict):
         '[emd][structure_determination_list][structure_determination][microscopy_list][single_particle_microscopy][tilt_angle_max]',
         '?'
     ]
-    if args.mode == "TOMO":
+    if args.mode == "TOMO" and args.category != "serialEM":
         emdb_xml_path_list.extend(['[emd][map][pixel_spacing][x]',
                                    '[emd][map][pixel_spacing][y]',
                                    '[emd][map][pixel_spacing][z]',
@@ -1502,8 +1575,9 @@ def translate_xml_to_cif(input_data, sessionName):
             if category == "date":
                 cif_values = [cif_values[0].split(" ")[0]]
             elif category == "accelerating_voltage":
-                if cif_values[0] != "?":
-                    cif_values = [int(float(cif_values[0]) / 1000)]
+                if not args.category == "serialEM":
+                    if cif_values[0] != "?":
+                        cif_values = [int(float(cif_values[0]) / 1000)]
             elif category == "nominal_defocus_min":
                 if cif_values[0] != "?":
                     cif_values = [int((cif_values[0]) * -1000)]
@@ -1521,6 +1595,9 @@ def translate_xml_to_cif(input_data, sessionName):
             # elif category == "illumination_mode":
             #     if cif_values[0] == "PARALLEL":
             #         cif_values = ["FLOOD BEAM"]
+            elif category == "microscope_model":
+                if cif_values[0] == "EMBL Krios 3":
+                    cif_values = ["TFS KRIOS"]
 
             category_list.append(category)
             cif_values_list.append(cif_values)
