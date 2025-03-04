@@ -28,38 +28,39 @@ from mmcif.api.DataCategory import DataCategory
 from mmcif.api.PdbxContainers import DataContainer
 from mmcif.io.PdbxWriter import PdbxWriter
 
+def parse_arguments():
+    prog = "EM HARVEST"
+    usage = """
+            Harvesting microscopy data for automatic depostion.
+            Example:
+            For single particle data usage is:
+            python emharvest.harvest.py -m SPA -c epu -e ../_repo_data/Supervisor_20230919_140141_84_bi23047-106_grid1/EpuSession.dm -a ../_repo_data/atlas/Supervisor_20230919_115905_Atlas_bi23047-106/ScreeningSession.dm  -o ../_repo_data/
+            or for non-standard epu files the command is like:
+            python emharvest.harvest.py -m SPA -c non-epu -i ../_repo_data/cm33879-3/raw5/metadata/Images-Disc1/GridSquare_30454884/GridSquare_20230531_130838.xml  -o ../_repo_data/dep_cm33879-3
+            or for tomogram data usage is:
+            python emharvest.harvest.py -m TOMO -t ../_repo_data/tomo_data/SearchMaps/Overview.xml -o ../dep_tomo/ -d ../_repo_data/tomo_data/Position_1_33.mdoc -y no
+            """
 
-prog = "EM HARVEST"
-usage = """
-        Harvesting microscopy data for automatic depostion.
-        Example:
-        For single particle data usage is:
-        python emharvest.harvest.py -m SPA -c epu -e ../_repo_data/Supervisor_20230919_140141_84_bi23047-106_grid1/EpuSession.dm -a ../_repo_data/atlas/Supervisor_20230919_115905_Atlas_bi23047-106/ScreeningSession.dm  -o ../_repo_data/
-        or for non-standard epu files the command is like:
-        python emharvest.harvest.py -m SPA -c non-epu -i ../_repo_data/cm33879-3/raw5/metadata/Images-Disc1/GridSquare_30454884/GridSquare_20230531_130838.xml  -o ../_repo_data/dep_cm33879-3
-        or for tomogram data usage is:
-        python emharvest.harvest.py -m TOMO -t ../_repo_data/tomo_data/SearchMaps/Overview.xml -o ../dep_tomo/ -d ../_repo_data/tomo_data/Position_1_33.mdoc -y no
-        """
-
-parser = argparse.ArgumentParser(description="Microscopy Data Harvest Script")
-parser.add_argument("-m", "--mode", choices=["SPA", "TOMO"], required=True,
-                    help="Mode: SPA for Single Particle Analysis or TOMO for Tomography")
-parser.add_argument("-c", "--category", choices=["epu", "non-epu", "serialEM"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
-parser.add_argument("-i", "--input_file", help="Any input SPA file which is in xml format (Required for SPA mode)")
-parser.add_argument("-e", "--epu", help="EPU session file: Session.dm (Required for SPA mode)")
-parser.add_argument("-a", "--atlas", help="Atlas session file: ScreeningSession.dm (Required for SPA mode)")
-parser.add_argument("-o", "--output", help="Output directory for generated reports")
-parser.add_argument("-p", "--print", help="Optional: Y = Only print xml and exit")
-parser.add_argument("-t", "--tomogram_file", help="Tomogram file (Required for TOMO mode)")
-parser.add_argument("-d", "--mdoc_file", help="Tomography mdoc file (Required for TOMO mode)")
-parser.add_argument("-y", "--download_dict", default="yes", choices=["yes", "no"], help="Optional: yes = Download the latest dictionary (default: yes)")
-args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Microscopy Data Harvest Script")
+    parser.add_argument("-m", "--mode", choices=["SPA", "TOMO"], required=True,
+                        help="Mode: SPA for Single Particle Analysis or TOMO for Tomography")
+    parser.add_argument("-c", "--category", choices=["epu", "non-epu", "serialEM"], help="Kind of microscopy input files that needs to be harvested (Required for SPA mode)")
+    parser.add_argument("-i", "--input_file", help="Any input SPA file which is in xml format (Required for SPA mode)")
+    parser.add_argument("-e", "--epu", help="EPU session file: Session.dm (Required for SPA mode)")
+    parser.add_argument("-a", "--atlas", help="Atlas session file: ScreeningSession.dm (Required for SPA mode)")
+    parser.add_argument("-o", "--output", help="Output directory for generated reports")
+    parser.add_argument("-p", "--print", help="Optional: Y = Only print xml and exit")
+    parser.add_argument("-t", "--tomogram_file", help="Tomogram file (Required for TOMO mode)")
+    parser.add_argument("-d", "--mdoc_file", help="Tomography mdoc file (Required for TOMO mode)")
+    parser.add_argument("-y", "--download_dict", default="yes", choices=["yes", "no"], help="Optional: yes = Download the latest dictionary (default: yes)")
+    return parser.parse_args()
 
 
 def main():
+    args = parse_arguments()
     if args.mode == "SPA" and args.category == "epu":
         if not args.epu or not args.atlas:
-            parser.error("SPA mode requires both --epu and --atlas files.")
+            args.error("SPA mode requires both --epu and --atlas files.")
 
         main.epu_xml = args.epu
         main.epu_directory = os.path.dirname(args.epu)
@@ -99,7 +100,7 @@ def main():
         tomogram_file = args.tomogram_file
         mdoc_file = args.mdoc_file
         if not tomogram_file or not mdoc_file:
-            parser.error("TOMO mode requires both --tomogram_file and a --mdoc file.")
+            args.error("TOMO mode requires both --tomogram_file and a --mdoc file.")
 
         output_dir = os.path.join(os.getcwd(), "emharvest")
         main.dep_dir = os.path.join(output_dir, "dep_tomo")
@@ -113,7 +114,7 @@ def main():
         if args.category == "serialEM":
             mdoc_file = args.mdoc_file
             if not mdoc_file:
-                parser.error("SPA and TOMO mode both requires a --mdoc file for SerialEM.")
+                args.error("SPA and TOMO mode both requires a --mdoc file for SerialEM.")
 
             output_dir = os.path.join(os.getcwd(), "emharvest")
             if args.mode == "SPA":
@@ -1652,4 +1653,5 @@ def mmcif_validation(cif_file, dic_file, output_file):
         return False, f"An unexpected error occurred: {str(e)}"
 
 if __name__ == "__main__":
+    args = parse_arguments()
     main()
