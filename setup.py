@@ -31,6 +31,7 @@ setup(
         'fpdf',
         'Pillow',
         'PyQt5',
+        'mmcif'
         # Add any additional dependencies here
     ],
     python_requires='>=3.6', # Specify your Python version requirement
