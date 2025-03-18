@@ -1,0 +1,60 @@
+Note: Ddl has invalid regex for sequence_dep:
+      [a-zA-Z0-9\t \r\n\v\f\(\)]+$
+      The expression contained an invalid escaped character, or a trailing escape.
+Reading harvested/ebic_tomo//88415364-c070-4f92-8adb-b826f79d8ccc_dep.cif...
+harvested/ebic_tomo//88415364-c070-4f92-8adb-b826f79d8ccc_dep.cif:12 [88415364-c070-4f92-8adb-b826f79d8ccc] PARALLEL is not one of the allowed values:
+	FLOOD BEAM
+	SPOT SCAN
+	OTHER
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_image_recording.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_image_recording.imaging_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_image_recording.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_image_recording.imaging_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_imaging.entry_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_imaging.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_imaging.entry_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_imaging.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_imaging.specimen_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_imaging_optics.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_imaging_optics.imaging_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_imaging_optics.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_imaging_optics.imaging_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_map.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_map.entry_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.axis_order_fast
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.axis_order_medium
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.axis_order_slow
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_a
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_alpha
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_b
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_beta
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_c
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.cell_gamma
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.data_type
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.dimensions_col
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.dimensions_row
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.dimensions_sec
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.endian_type
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.entry_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.format
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.origin_col
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.origin_row
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.origin_sec
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.partition
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.size_kb
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.spacing_x
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.spacing_y
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.spacing_z
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.symmetry_space_group
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_map.type
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_software.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_software.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_support_film.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_support_film.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_support_film.sample_support_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_tomography.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing category key: _em_tomography.imaging_id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_tomography.id
+[88415364-c070-4f92-8adb-b826f79d8ccc] missing mandatory tag: _em_tomography.imaging_id
+FAILED

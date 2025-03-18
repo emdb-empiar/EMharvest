@@ -1,0 +1,28 @@
+Note: Ddl has invalid regex for sequence_dep:
+      [a-zA-Z0-9\t \r\n\v\f\(\)]+$
+      The expression contained an invalid escaped character, or a trailing escape.
+Reading harvested/bi23047-93/2ad24752-ce2c-40c8-904a-e5972f69da7e_dep.cif...
+harvested/bi23047-93/2ad24752-ce2c-40c8-904a-e5972f69da7e_dep.cif:7 [2ad24752-ce2c-40c8-904a-e5972f69da7e] value out of expected range: 740
+harvested/bi23047-93/2ad24752-ce2c-40c8-904a-e5972f69da7e_dep.cif:12 [2ad24752-ce2c-40c8-904a-e5972f69da7e] PARALLEL is not one of the allowed values:
+	FLOOD BEAM
+	SPOT SCAN
+	OTHER
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_image_recording.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_image_recording.imaging_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_image_recording.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_image_recording.imaging_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_imaging.entry_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_imaging.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_imaging.entry_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_imaging.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_imaging.specimen_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_imaging_optics.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_imaging_optics.imaging_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_imaging_optics.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_imaging_optics.imaging_id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_software.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_software.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing category key: _em_support_film.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_support_film.id
+[2ad24752-ce2c-40c8-904a-e5972f69da7e] missing mandatory tag: _em_support_film.sample_support_id
+FAILED

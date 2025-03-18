@@ -1,0 +1,31 @@
+data_dea57c9e-3b44-4250-8d95-750878c8ecb3
+
+_em_imaging.microscope_model          "TFS KRIOS"
+_em_imaging.microscope_serial_number  52335130
+_em_imaging.date                      2023-05-31
+_em_imaging.accelerating_voltage      300
+_em_imaging.nominal_magnification     740
+_em_imaging.nominal_defocus_min       ?
+_em_imaging.nominal_defocus_max       ?
+_em_imaging.c2_aperture_diameter      50
+_em_imaging.mode                      "BRIGHT FIELD"
+_em_imaging.illumination_mode         PARALLEL
+_em_imaging.electron_source           "FIELD EMISSION GUN"
+_em_imaging.tilt_angle_min            -0.0105
+_em_imaging.tilt_angle_max            0.66244
+_em_imaging.objective_aperture        100
+#
+_em_software.name      EPU
+_em_software.version   3.3.1.5184
+_em_software.category  "IMAGE ACQUISITION"
+#
+_em_support_film.material  ?
+_em_support_film.topology  ?
+#
+_em_image_recording.film_or_detector_model       "TFS FALCON 4i (4k x 4k)"
+_em_image_recording.avg_electron_dose_per_image  ?
+_em_image_recording.average_exposure_time        0.99
+_em_image_recording.detector_mode                .
+#
+_em_imaging_optics.energyfilter_slit_width  ?
+##

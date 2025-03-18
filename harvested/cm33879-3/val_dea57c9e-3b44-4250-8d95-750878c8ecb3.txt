@@ -1,0 +1,28 @@
+Note: Ddl has invalid regex for sequence_dep:
+      [a-zA-Z0-9\t \r\n\v\f\(\)]+$
+      The expression contained an invalid escaped character, or a trailing escape.
+Reading harvested/cm33879-3/dea57c9e-3b44-4250-8d95-750878c8ecb3_dep.cif...
+harvested/cm33879-3/dea57c9e-3b44-4250-8d95-750878c8ecb3_dep.cif:7 [dea57c9e-3b44-4250-8d95-750878c8ecb3] value out of expected range: 740
+harvested/cm33879-3/dea57c9e-3b44-4250-8d95-750878c8ecb3_dep.cif:12 [dea57c9e-3b44-4250-8d95-750878c8ecb3] PARALLEL is not one of the allowed values:
+	FLOOD BEAM
+	SPOT SCAN
+	OTHER
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_image_recording.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_image_recording.imaging_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_image_recording.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_image_recording.imaging_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_imaging.entry_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_imaging.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_imaging.entry_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_imaging.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_imaging.specimen_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_imaging_optics.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_imaging_optics.imaging_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_imaging_optics.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_imaging_optics.imaging_id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_software.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_software.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing category key: _em_support_film.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_support_film.id
+[dea57c9e-3b44-4250-8d95-750878c8ecb3] missing mandatory tag: _em_support_film.sample_support_id
+FAILED

@@ -1,0 +1,36 @@
+{
+    "em_imaging": {
+        "microscope_model": "TFS KRIOS",
+        "microscope_serial_number": "52336320",
+        "date": "2023-09-19 14:03:40",
+        "accelerating_voltage": "300000",
+        "nominal_magnification": "165000",
+        "nominal_defocus_min": -0.5,
+        "nominal_defocus_max": -2.5,
+        "c2_aperture_diameter": "50",
+        "mode": "BrightField",
+        "illumination_mode": "?",
+        "electron_source": "FieldEmission",
+        "tilt_angle_min": -0.02922,
+        "tilt_angle_max": 1.01023,
+        "objective_aperture": "100"
+    },
+    "em_software": {
+        "name": "EPU",
+        "version": "3.0.0-873.0",
+        "category": "IMAGE ACQUISITION"
+    },
+    "em_support_film": {
+        "material": "Carbon",
+        "topology": "Holey"
+    },
+    "em_image_recording": {
+        "film_or_detector_model": "GATAN K3 BIOQUANTUM (6k x 4k)",
+        "avg_electron_dose_per_image": "?",
+        "average_exposure_time": "0.75",
+        "detector_mode": "COUNTING"
+    },
+    "em_imaging_optics": {
+        "energyfilter_slit_width": "10"
+    }
+}
