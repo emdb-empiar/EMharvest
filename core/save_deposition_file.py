@@ -178,7 +178,9 @@ def save_deposition_file(CompleteDataDict):
     # Duplicate the last row
     mmcif_name = df.iloc[-1]
     # Append to DF
-    df = df.append(mmcif_name, ignore_index=True)
+    df = pd.concat([df, pd.DataFrame([mmcif_name])], ignore_index=True)
+
+    # df = df.append(mmcif_name, ignore_index=True)
 
     tfs_xml_path_list = [
         '[MicroscopeImage][microscopeData][instruments][InstrumentModel]',
@@ -286,8 +288,9 @@ def save_deposition_file(CompleteDataDict):
     df_transpose['JSON'] = df_transpose['JSON'].apply(lambda x: '[' + x.replace('.', '][') + ']')
     # Save to CSV
     df_transpose.to_csv(args.output_dir + '/' + CompleteDataDict['main_sessionName'] + '_dep.csv', index=True, header=True)
+    df1_selected = df1.apply(lambda x: x.map(lambda item: item.item() if isinstance(item, (np.generic, np.ndarray)) else item) if x.name in df1.columns else x, axis=0)
 
-    df1_selected = df1.applymap(lambda x: x.item() if isinstance(x, (np.generic, np.ndarray)) else x)
+    # df1_selected = df1.applymap(lambda x: x.item() if isinstance(x, (np.generic, np.ndarray)) else x)
 
     # Create nested dictionary from the DataFrame
     nested_dict = {}
