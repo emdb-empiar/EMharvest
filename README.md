@@ -30,29 +30,22 @@ $ source python/bin/activate
 
 Usage Instructions:
 
-Navigate to the output directory (optional):
-$ cd /path/to/working/output/area
-
 Run a harvest on a single visit directory:
-$ emharvest.harvest.py --help
-$ emharvest.harvest.py
-
-Use the GUI for harvesting:
-$ emharvest.py
-
+$ python emh.py --help
+$ python emh.py
 
 # Usage
 
 EMharvest is used to extract metadata from cryo-EM microscopy files to help streamline OneDep deposition. It supports both EPU and SerialEM for both SPA and TOMO datasets.
 
-python emharvest.harvest.py [OPTIONS]
+python emh.py [OPTIONS]
 
 Arguments:
 
 |Argument|	short|	Required|	Description|
 |--mode|	-m|	Yes|	Mode selection: SPA for Single Particle Analysis or TOMO for Tomography|
-|--category|	-c|	Yes (for SPA)|	Type of microscopy input files: epu, non-epu, or serialEM|
-|--input_file|	-i|	Yes (for SPA, non-epu)|	Input SPA file in XML format (for non-standard EPU files)|
+|--category|	-c|	Yes (for SPA)|	Type of microscopy input files: epu, epu_no_dm, or serialEM|
+|--input_file|	-i|	Yes (for SPA, epu_no_dm)|	Input SPA file in XML format (for non-standard EPU files)|
 |--epu|		-e|	Yes (for SPA, epu)|	EPU session file (Session.dm)|
 |--atlas|	-a|	Yes (for SPA, epu)|	Atlas session file (ScreeningSession.dm)|
 |--output|	-o|	Yes|	Output directory for generated reports|
@@ -69,13 +62,13 @@ The repository supports the following file formats as of now:
 
 Example Usage:
 1. Running EMharvest for an EPU session:
-python emharvest.harvest.py -m SPA -c epu -e Supervisor_20230919_140141_84_bi23047-106_grid1/EpuSession.dm -a Supervisor_20230919_115905_Atlas_bi23047-106/ScreeningSession.dm -o ../output_files/
+python emh.py -m SPA -c epu -e <path/to/EPU_SESSION_FILE> -a <path/to/ATLAS_SESSION_FILE> -o <path/to/OUTPUT_DIRECTORY>
 
 2. Running EMharvest for EPU in the absence of ScreeningSession.dm files:
-python emharvest.harvest.py -m SPA -c non-epu -i raw5/metadata/Images-Disc1/GridSquare_30454884/GridSquare_20230531_130838.xml -o ../output_files/
+python emh.py -m SPA -c epu_no_dm -i <path/to/GRID_SQUARE_XML_FILE> -o <path/to/OUTPUT_DIRECTORY>
 
 3. Running EMharvest for SerialEM tilt Series session:
-python emharvest.harvest.py -m TOMO -t tomo_data/SearchMaps/Overview.xml -d tomo_data/Position_1_01.mdoc -o ../output_files/ -y no
+python emh.py -m TOMO -c serialEM -t <path/to/OVERVIEW_XML_FILE> -d <path/to/MDOC_FILE> -o <path/to/OUTPUT_DIRECTORY> -l no
 
 # Validation
 

@@ -48,7 +48,9 @@ def AnyXMLDataFile(xmlpath):
     xmlAPix = roundup(xmlAPix, 1)
     soft_name = data["microscopeData"]["core"]["ApplicationSoftware"]
     if soft_name == "Tomography":
-        software_name = "FEI tomography"
+        software_name = "TFS tomography"
+    elif soft_name == "TemAppCommon":
+        software_name = "TFS tomography"
     else:
         software_name = soft_name
     software_version = data["microscopeData"]["core"]["ApplicationSoftwareVersion"]

@@ -393,6 +393,8 @@ def getStageTilt(micpath: Path) -> Dict[str, Any]:
 def xml_session(xml_path: Path) -> pd.DataFrame:
     data_dict = {}
     with open(xml_path, "r") as xml:
+        first_line = xml.readline().strip()  # Read only the first line to extract version
+        xml.seek(0) # Reset file pointer to read full content
         for_parsing = xml.read()
         data = xmltodict.parse(for_parsing)
     data = data["EpuSessionXml"]
@@ -400,14 +402,23 @@ def xml_session(xml_path: Path) -> pd.DataFrame:
     # Location of EPU session directory on which this script was ran
     data_dict['realPath'] = os.path.realpath(xml_path)
 
-    # EPU version
-    epuId = data["Version"]["@z:Id"]
-    epuBuild = data["Version"]["a:_Build"]
-    epuMajor = data["Version"]["a:_Major"]
-    epuMinor = data["Version"]["a:_Minor"]
-    epuRevision = data["Version"]["a:_Revision"]
-    data_dict['epuVersion'] = str(epuMajor) + '.' + str(epuMinor) + '.' + str(epuRevision) + '-' + str(
-        epuId) + '.' + str(epuBuild)
+    # EPU version (old way of harvesting EPU Version, did not work well when harvested from Epusession.dm files)
+    # epuId = data["Version"]["@z:Id"]
+    # epuBuild = data["Version"]["a:_Build"]
+    # epuMajor = data["Version"]["a:_Major"]
+    # epuMinor = data["Version"]["a:_Minor"]
+    # epuRevision = data["Version"]["a:_Revision"]
+    # data_dict['epuVersion'] = str(epuMajor) + '.' + str(epuMinor) + '.' + str(epuRevision) + '-' + str(
+    #     epuId) + '.' + str(epuBuild)
+
+    #Extract EPU version from the first line's z:Assembly
+    assembly_match = re.search(r'z:Assembly="([^"]+)"', first_line)
+    z_assembly = assembly_match.group(1) if assembly_match else "Unknown"
+
+    version_match = re.search(r'Version=([\d.]+)', z_assembly)
+    epu_version = version_match.group(1) if version_match else "?"
+
+    data_dict['epuVersion'] = epu_version
 
     # Output format
     data_dict['doseFractionOutputFormat'] = data["DoseFractionsOutputFormat"]["#text"]
@@ -491,7 +502,6 @@ def xml_session(xml_path: Path) -> pd.DataFrame:
         data_dict['defocusMax'] = min(defocusRangeRound)
         data_dict['defocusMin'] = max(defocusRangeRound)
 
-    # print(data_dict)
     df = pd.DataFrame(data_dict, index=[0])
 
     # Print to terminal
@@ -547,9 +557,6 @@ def formatEPUDate(d):
     # Read in EPU formatted date and time - remember input is a string
     epuDate = dateutil.parser.parse(d)
     epuDate = epuDate.strftime("%Y-%m-%d %H:%M:%S")
-    # new_date = datetime.datetime.strptime(d,"%Y-%m-%dT%H:%M:%S.%fZ")
-    # Reformat date into YY-MM-DD HH-MM-SS
-    # return new_date.strftime("%Y-%m-%d %H:%M:%S")
     return datetime.datetime.strptime(epuDate, "%Y-%m-%d %H:%M:%S")
 
 
@@ -635,11 +642,6 @@ def find_mics(path, search):
     # So find mics can be used independently
 
     print('Looking for micrograph data in EPU directory using extension: ' + search)
-    print('path', path, search)
-    # Just get file names
-    # files = glob.glob("./Images-Disc1/GridSquare*/Data/*xml")
-    # files.sort(key=os.path.getmtime)
-    # print("\n".join(files))
 
     # Old method of finding xml files
     searchedFiles = glob.glob(path + "/**/GridSquare*/Data/*" + search + '*')
@@ -649,9 +651,6 @@ def find_mics(path, search):
     else:
         print('No micrographs found with search term: ' + search)
         searchedFiles = 'exit'
-
-    # New method of finding xml files
-    # searchedFiles = searchSupervisorData.xmlList
 
     return searchedFiles
 
@@ -687,6 +686,8 @@ def deposition_file(xml):
     model = model_serial_split[0]
     if model == "TITAN":
         model = "TFS KRIOS"
+    elif model == "ARCTICA":
+        model = "TFS TALOS"
     microscope_serial_number = model_serial_split[1]
     eV = data["microscopeData"]["gun"]["AccelerationVoltage"]
 
@@ -749,7 +750,6 @@ def perform_minimal_harvest_epu(xml_path, output_dir):
     xml_presets(xml_path, atlas_data, tile_data)
 
     # Get presets specific to acqusition magnifcation which are only contained in an acqusition image xml
-    # xml_presets_data(searchSupervisorData.xmlData)
     tile_file = os.path.join(tile_folder, tile_data["xmlData"])
 
     xml_presets_data(tile_data["xmlData"])
@@ -759,19 +759,14 @@ def perform_minimal_harvest_epu(xml_path, output_dir):
     print('\033[1m' + 'Finding main EPU session parameters:' + '\033[0m')
     print('')
 
-    # xml_session(xml_path)
-    # Call the function with the path to your XML file
     main.masterdf = xml_session(xml_path)
 
-    # Find mics via xml for counting
-    # searchedFiles = find_mics(main.epu_directory, 'xml')
     grid_folder = os.path.dirname(args.epu)
     searchedFiles = find_mics(grid_folder, 'xml')
     if searchedFiles == 'exit':
         print("exiting due to not finding any image xml data")
         exit()
     main.mic_count = len(searchedFiles)
-    print("XML_PATH", xml_path)
     # Create a deposition file
     deposition_file(xml_path)
 
