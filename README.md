@@ -45,10 +45,10 @@ Arguments:
 |Argument|	short|	Required|	Description|      
 |--------|------|---------|------------|
 |--mode|	-m|	Yes|	Mode selection: SPA for Single Particle Analysis or TOMO for Tomography|  
-|--category|	-c|	Yes (for SPA)|	Type of microscopy input files: epu, epu_no_dm, or serialEM|  
+|--category|	-c|	Yes (for SPA, TOMO)|	Type of microscopy input files: epu, epu_no_dm (no EpuSession.dm file), or serialEM|  
 |--input_file|	-i|	Yes (for SPA, epu_no_dm)|	Input SPA file in XML format (missing EpuSession.dm files)|  
-|--epu|		-e|	Yes (for SPA, epu)|	EPU session file (ScreeningSession.dm)|  
-|--atlas|	-a|	Yes (for SPA, epu)|	Atlas session file (Atlas*.xml)|  
+|--epu|		-e|	Yes (for SPA, epu)|	EPU session file (EpuSession.dm)|  
+|--atlas|	-a|	Yes (for SPA, epu)|	Atlas session file (ScreeningSession.xml)|  
 |--output|	-o|	Yes|	Output directory for generated reports|  
 |--print|	-p|	No|	If Y, only prints XML and exits|  
 |--tomogram_file|	-t|	Yes (for TOMO)|	Input tomography file (Overview.xml)|  
@@ -56,7 +56,7 @@ Arguments:
 |--download_dict|	-y|	 No|	Download latest mmCIF dictionary (yes or no, default: yes)|  
 
 The repository supports the following file formats as of now:  
-- EPU session metadata from xml and dm files (Example: Atlas*.xml, ScreeningSession.dm and EpuSession.dm)
+- EPU session metadata from xml and dm files (Example: Atlas*.xml/GridSquare*.xml, ScreeningSession.dm and EpuSession.dm)
 - EPU session metadata (without DM files) only from xml files (Example: GridSquare*.xml)
 - SerialEM micrograph metadata from mdoc files (Example: *.eer.mdoc)
 - SerialEM tomogram metadata from mdoc files (Example: Position*.mdoc)
