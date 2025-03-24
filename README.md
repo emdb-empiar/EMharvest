@@ -58,7 +58,7 @@ Arguments:
 The repository supports the following file formats as of now:  
 - EPU session metadata from xml and dm files (Example: Atlas*.xml/GridSquare*.xml, ScreeningSession.dm and EpuSession.dm)
 - EPU session metadata (without DM files) only from xml files (Example: GridSquare*.xml)
-- SerialEM micrograph metadata from mdoc files (Example: *.eer.mdoc)
+- SerialEM micrograph metadata from mdoc files (Example: *.mdoc/*.eer.mdoc)
 - SerialEM tomogram metadata from mdoc files (Example: Position*.mdoc)
 
 Example Usage:
