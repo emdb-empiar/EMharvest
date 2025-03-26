@@ -5,7 +5,8 @@ from setuptools import setup, find_packages
 setup(
     name='emharvest',
     version='1.0.0',
-    packages=find_packages(),
+    packages=['emharvest'],
+    package_dir={'emharvest': 'core'},
     description='A system for parsing TFS EPU and SerialEM data structures',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

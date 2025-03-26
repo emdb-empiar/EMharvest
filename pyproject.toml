@@ -6,11 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "emharvest"
 version = "1.0.0"
 description = "A system for parsing TFS EPU and SerialEM data structures"
-long-description = "file: README.md"
-long-description-content-type = "text/markdown"
-license = "BSD 3-Clause License"
+license = "BSD-3-Clause"
 authors = [{ name = "Amudha Kumari Duraisamy", email = "amudha@ebi.ac.uk" }, { name = "Kyle Morris", email = "kyle@ebi.ac.uk" }]
-url = "https://github.com/kylelmorris/EMinsight"
 dependencies = [
     "glom",
     "tqdm",
@@ -33,10 +30,21 @@ dependencies = [
     "mmcif"
     # Add any additional dependencies here
 ]
-python-requires = ">=3.6"
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English"
+]
+dynamic = ["readme"]
 
-[project.classifiers]
-"Development Status :: 3 - Alpha" = true
-"Intended Audience :: Developers" = true
-"Natural Language :: English" = true
+[project.scripts]
+emharvest = "emharvest.emharvest_main:main"
+
+[project.urls]
+GitHub = "https://github.com/kylelmorris/EMinsight"
+
+[tool.setuptools]
+packages = ["emharvest"]
+package-dir = {"emharvest" = "core"}
 
