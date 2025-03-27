@@ -14,7 +14,7 @@ def unique_values(existing_list, new_values):
 
 def TomoMdocData(mdocpath):
     """Reading the mdoc file information and storing in a dictionary."""
-    from core.emharvest_main import parse_arguments
+    from emharvest.emharvest_main import parse_arguments
     args = parse_arguments()
 
     mdoc_data = {}

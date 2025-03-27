@@ -1,7 +1,7 @@
-from core.foilHole_data import FoilHoleData
-from core.xml_data_harvest import AnyXMLDataFile
-from core.save_deposition_file import save_deposition_file
-from core.tomo_mdoc_data import TomoMdocData
+from emharvest.foilHole_data import FoilHoleData
+from emharvest.xml_data_harvest import AnyXMLDataFile
+from emharvest.save_deposition_file import save_deposition_file
+from emharvest.tomo_mdoc_data import TomoMdocData
 
 def perform_serialEM_harvest(mdoc_file, output_dir):
     """

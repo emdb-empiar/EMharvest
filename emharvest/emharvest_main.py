@@ -18,10 +18,10 @@ from rich.pretty import pprint
 from typing import Any, Dict
 import xmltodict
 
-from core.harvestor import perform_tomogram_harvest, perform_spa_harvest_nonepu, perform_serialEM_harvest
-from core.atlas_files import findpattern, searchSupervisorAtlas, searchSupervisorData
-from core.foilHole_data import FoilHoleData
-from core.save_deposition_file import save_deposition_file
+from emharvest.harvestor import perform_tomogram_harvest, perform_spa_harvest_nonepu, perform_serialEM_harvest
+from emharvest.atlas_files import findpattern, searchSupervisorAtlas, searchSupervisorData
+from emharvest.foilHole_data import FoilHoleData
+from emharvest.save_deposition_file import save_deposition_file
 
 def parse_arguments():
     prog = "EM HARVEST"

@@ -1,6 +1,6 @@
 import sys
 import logging
-from core.emharvest_main import main
+from emharvest.emharvest_main import main
 
 def run():
     """Entry point for the emharvest package."""

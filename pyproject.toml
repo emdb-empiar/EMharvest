@@ -10,7 +10,7 @@ long-description = "file: README.md"
 long-description-content-type = "text/markdown"
 license = "BSD 3-Clause License"
 authors = [{ name = "Amudha Kumari Duraisamy", email = "amudha@ebi.ac.uk" }, { name = "Kyle Morris", email = "kyle@ebi.ac.uk" }]
-url = "https://github.com/kylelmorris/EMinsight"
+url = "https://github.com/emdb-empiar/EMharvest"
 dependencies = [
     "glom",
     "tqdm",
