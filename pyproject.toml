@@ -8,6 +8,8 @@ version = "1.0.0"
 description = "A system for parsing TFS EPU and SerialEM data structures"
 license = "BSD-3-Clause"
 authors = [{ name = "Amudha Kumari Duraisamy", email = "amudha@ebi.ac.uk" }, { name = "Kyle Morris", email = "kyle@ebi.ac.uk" }]
+url = "https://github.com/emdb-empiar/EMharvest"
+
 dependencies = [
     "glom",
     "tqdm",

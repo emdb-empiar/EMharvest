@@ -8,7 +8,7 @@ def write_mmcif_file(data_list, sessionName):
     pdbx writer is used to write data stored in self.__dataList
     :return written: a boolean; True when pdf writer is finished
     """
-    from core.emharvest_main import parse_arguments
+    from emharvest.emharvest_main import parse_arguments
     args = parse_arguments()
     written = False
     depfilepath = args.output_dir + '/' + sessionName
@@ -59,7 +59,7 @@ def translate_xml_to_cif(input_data, sessionName):
     """
     Translates input XML data into a CIF file.
     """
-    from core.emharvest_main import parse_arguments
+    from emharvest.emharvest_main import parse_arguments
     args = parse_arguments()
 
     if not input_data:

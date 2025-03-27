@@ -12,8 +12,8 @@ setup(
     long_description_content_type='text/markdown',
     license='BSD 3-Clause License',
     author='Kyle Morris',
-    author_email='kyle.morris@diamond.ac.uk',
-    url='https://github.com/kylelmorris/EMinsight',
+    author_email='kyle@ebi.ac.uk',
+    url='https://github.com/emdb-empiar/EMharvest',
     install_requires=[
         'glom',
         'tqdm',

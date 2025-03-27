@@ -4,8 +4,8 @@ import json
 import urllib
 import hashlib
 
-from core.mmcif_writer import translate_xml_to_cif
-from core.mmcif_validator import *
+from emharvest.mmcif_writer import translate_xml_to_cif
+from emharvest.mmcif_validator import *
 
 def SubFramePath(CompleteDataDict, n):
     """
@@ -64,7 +64,7 @@ def save_deposition_file(CompleteDataDict):
         Returns:
             None
     """
-    from core.emharvest_main import parse_arguments
+    from emharvest.emharvest_main import parse_arguments
 
     args = parse_arguments()
     # Save doppio deposition csv file
@@ -185,7 +185,7 @@ def save_deposition_file(CompleteDataDict):
     tfs_xml_path_list = [
         '[MicroscopeImage][microscopeData][instruments][InstrumentModel]',
         '?',
-        '[MicroscopeImage][microscopeData][core][ApplicationSoftware]',
+        '[MicroscopeImage][microscopeData][emharvest][ApplicationSoftware]',
         '[MicroscopeImage][microscopeData][acquisitionDateTime]',
         '[MicroscopeImage][microscopeData][gun][AccelerationVoltage]',
         '[MicroscopeImage][microscopeData][optics][TemMagnification][NominalMagnification]',
@@ -200,7 +200,7 @@ def save_deposition_file(CompleteDataDict):
         '[MicroscopeImage][microscopeData][optics][BeamDiameter]',
         '?',
         '?',
-        '[MicroscopeImage][microscopeData][core][ApplicationSoftwareVersion]',
+        '[MicroscopeImage][microscopeData][emharvest][ApplicationSoftwareVersion]',
         'PREDEFINED VALUE',
         '[MicroscopeImage][microscopeData][optics][ColumnOperatingTemSubMode]',
         '[MicroscopyImage][CustomData][a:KeyValueOfstringanyType][a:Key] isDetectorCommercialName then extract [<a:Value>]',
