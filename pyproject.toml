@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emharvest"
+version = "1.0.0"
+description = "A system for parsing TFS EPU and SerialEM data structures"
+license = "BSD-3-Clause"
+authors = [{ name = "Amudha Kumari Duraisamy", email = "amudha@ebi.ac.uk" }, { name = "Kyle Morris", email = "kyle@ebi.ac.uk" }]
+url = "https://github.com/emdb-empiar/EMharvest"
+
+dependencies = [
+    "glom",
+    "tqdm",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn",
+    "scipy",
+    "xmltodict",
+    "rich",
+    "starparser",
+    "mrcfile",
+    "gemmi",
+    "starfile",
+    "pyem",
+    "fpdf",
+    "Pillow",
+    "PyQt5",
+    "mmcif"
+    # Add any additional dependencies here
+]
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English"
+]
+dynamic = ["readme"]
+
+[project.scripts]
+emharvest = "emharvest.emharvest_main:main"
+
+[project.urls]
+GitHub = "https://github.com/kylelmorris/EMinsight"
+
+[tool.setuptools]
+packages = ["emharvest"]
+package-dir = {"emharvest" = "core"}
+
